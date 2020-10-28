@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-1 h-screen overflow-hidden bg-black" id="main">
+  <div class="flex flex-col flex-1 bg-black" id="main">
     <div class="flex justify-center w-full mt-6">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -12,18 +12,54 @@
         />
       </svg>
     </div>
-    <Board />
-    <Characters />
+    <div class="flex items-center justify-center w-full">
+      <Board />
+    </div>
+    <div class="flex justify-center">
+      <div v-if="characterLoading">The Force will be with you. Always ...</div>
+      <div v-else class="grid grid-cols-3 gap-10">
+        <Characters
+          v-for="(character, index) in characters"
+          :key="index"
+          :character="character"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+  import { store } from "../store";
   import Board from "./Board";
   import Characters from "./Characters";
   export default {
     name: "App",
     components: { Board, Characters },
-    data: () => ({}),
+    data: () => ({
+      characterLoading: true,
+      characters: store.state.characters,
+    }),
+    mounted() {
+      axios
+        .get("https://swapi.dev/api/people/")
+        .then((res) => {
+          let numCharacters = res.data.count;
+          let numCharactersPerPage = res.data.results.length;
+          let numPages = Math.floor(numCharacters / numCharactersPerPage) + 1;
+
+          for (let i = 1; i <= numPages; i++) {
+            axios.get(`https://swapi.dev/api/people/?page=${i}`).then((res) => {
+              store.initialiseCharacters(res.data.results);
+            });
+          }
+        })
+        .catch((error) => {
+          console.log("erorr");
+        })
+        .finally(() => {
+          this.characterLoading = false;
+        });
+    },
   };
 </script>
 
@@ -31,5 +67,6 @@
   #main {
     background: url("/images/galaxy.jpg") no-repeat 50% 50%;
     background-size: cover;
+    background-attachment: fixed;
   }
 </style>

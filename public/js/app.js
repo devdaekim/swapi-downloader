@@ -1908,8 +1908,9 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Board__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Board */ "./resources/js/components/Board.vue");
-/* harmony import */ var _Characters__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Characters */ "./resources/js/components/Characters.vue");
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../store */ "./resources/js/store.js");
+/* harmony import */ var _Board__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Board */ "./resources/js/components/Board.vue");
+/* harmony import */ var _Characters__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Characters */ "./resources/js/components/Characters.vue");
 //
 //
 //
@@ -1929,16 +1930,50 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "App",
   components: {
-    Board: _Board__WEBPACK_IMPORTED_MODULE_0__["default"],
-    Characters: _Characters__WEBPACK_IMPORTED_MODULE_1__["default"]
+    Board: _Board__WEBPACK_IMPORTED_MODULE_1__["default"],
+    Characters: _Characters__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data: function data() {
-    return {};
+    return {
+      characterLoading: true,
+      characters: _store__WEBPACK_IMPORTED_MODULE_0__["store"].state.characters
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    axios.get("https://swapi.dev/api/people/").then(function (res) {
+      var numCharacters = res.data.count;
+      var numCharactersPerPage = res.data.results.length;
+      var numPages = Math.floor(numCharacters / numCharactersPerPage) + 1;
+
+      for (var i = 1; i <= numPages; i++) {
+        axios.get("https://swapi.dev/api/people/?page=".concat(i)).then(function (res) {
+          _store__WEBPACK_IMPORTED_MODULE_0__["store"].initialiseCharacters(res.data.results);
+        });
+      }
+    })["catch"](function (error) {
+      console.log("erorr");
+    })["finally"](function () {
+      _this.characterLoading = false;
+    });
   }
 });
 
@@ -1953,14 +1988,57 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../store */ "./resources/js/store.js");
 //
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Board",
   data: function data() {
-    return {};
+    return {
+      selectedCharacters: []
+    };
+  },
+  mounted: function mounted() {
+    this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
+  },
+  methods: {
+    reset: function reset() {
+      _store__WEBPACK_IMPORTED_MODULE_0__["store"].resetSelectedCharacters();
+      this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
+    }
   }
 });
 
@@ -1975,14 +2053,50 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../store */ "./resources/js/store.js");
 //
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Characters",
+  props: ["character"],
   data: function data() {
     return {};
+  },
+  computed: {
+    uppercasedName: function uppercasedName() {
+      return this.character.name.toUpperCase();
+    }
+  },
+  methods: {
+    addCharacter: function addCharacter(character) {
+      _store__WEBPACK_IMPORTED_MODULE_0__["store"].addCharacter(character);
+    }
   }
 });
 
@@ -2000,7 +2114,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "#main[data-v-332fccf4] {\n  background: url(\"/images/galaxy.jpg\") no-repeat 50% 50%;\n  background-size: cover;\n}\n", ""]);
+exports.push([module.i, "#main[data-v-332fccf4] {\n  background: url(\"/images/galaxy.jpg\") no-repeat 50% 50%;\n  background-size: cover;\n  background-attachment: fixed;\n}\n", ""]);
 
 // exports
 
@@ -20283,10 +20397,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    {
-      staticClass: "flex flex-col flex-1 h-screen overflow-hidden bg-black",
-      attrs: { id: "main" }
-    },
+    { staticClass: "flex flex-col flex-1 bg-black", attrs: { id: "main" } },
     [
       _c("div", { staticClass: "flex justify-center w-full mt-6" }, [
         _c(
@@ -20310,11 +20421,29 @@ var render = function() {
         )
       ]),
       _vm._v(" "),
-      _c("Board"),
+      _c(
+        "div",
+        { staticClass: "flex items-center justify-center w-full" },
+        [_c("Board")],
+        1
+      ),
       _vm._v(" "),
-      _c("Characters")
-    ],
-    1
+      _c("div", { staticClass: "flex justify-center" }, [
+        _vm.characterLoading
+          ? _c("div", [_vm._v("The Force will be with you. Always ...")])
+          : _c(
+              "div",
+              { staticClass: "grid grid-cols-3 gap-10" },
+              _vm._l(_vm.characters, function(character, index) {
+                return _c("Characters", {
+                  key: index,
+                  attrs: { character: character }
+                })
+              }),
+              1
+            )
+      ])
+    ]
   )
 }
 var staticRenderFns = []
@@ -20339,7 +20468,67 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_vm._v("Board")])
+  return _c(
+    "div",
+    { staticClass: "h-24 py-4 mb-6 transition duration-500 ease-in-out" },
+    [
+      _vm.selectedCharacters.length
+        ? _c("div", [
+            _c(
+              "div",
+              { staticClass: "text-xl text-white" },
+              [
+                _vm._v("\n      You have selected\n      "),
+                _vm._l(_vm.selectedCharacters, function(character, index) {
+                  return _c("span", { key: index }, [
+                    _vm._v(
+                      "\n        " + _vm._s(character.name) + "\n        "
+                    ),
+                    index < _vm.selectedCharacters.length - 1
+                      ? _c("span", [_vm._v(",")])
+                      : _vm._e()
+                  ])
+                })
+              ],
+              2
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: "flex justify-center space-x-4" }, [
+              _vm.selectedCharacters.length === 3
+                ? _c(
+                    "button",
+                    {
+                      staticClass:
+                        "flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 focus:outline-none",
+                      attrs: { type: "button" }
+                    },
+                    [_vm._v("download")]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass:
+                    "flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-white uppercase bg-red-500 focus:outline-none",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function($event) {
+                      return _vm.reset()
+                    }
+                  }
+                },
+                [_vm._v("reset")]
+              )
+            ])
+          ])
+        : _c("div", [
+            _c("p", { staticClass: "text-xl text-white" }, [
+              _vm._v("Select 3 characters to download")
+            ])
+          ])
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -20363,7 +20552,51 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_vm._v("Characters")])
+  return _c(
+    "div",
+    {
+      staticClass:
+        "flex items-center h-32 transition duration-500 ease-in-out transform bg-white cursor-pointer hover:-translate-y-1 hover:bg-gray-300",
+      on: {
+        click: function($event) {
+          return _vm.addCharacter(_vm.character)
+        }
+      }
+    },
+    [
+      _c("div", { staticClass: "h-32" }, [
+        _c(
+          "svg",
+          {
+            staticClass: "h-32 text-gray-700",
+            attrs: {
+              fill: "currentColor",
+              stroke: "currentColor",
+              viewBox: "0 0 24 24",
+              xmlns: "http://www.w3.org/2000/svg"
+            }
+          },
+          [
+            _c("path", {
+              attrs: {
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round",
+                "stroke-width": "2",
+                d:
+                  "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              }
+            })
+          ]
+        )
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "w-full p-4 font-bold text-right text-gray-700" },
+        [_c("p", [_vm._v(_vm._s(_vm.uppercasedName))])]
+      )
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -32808,6 +33041,43 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Characters_vue_vue_type_template_id_bc13dbd6_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
+
+/***/ }),
+
+/***/ "./resources/js/store.js":
+/*!*******************************!*\
+  !*** ./resources/js/store.js ***!
+  \*******************************/
+/*! exports provided: store */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "store", function() { return store; });
+var store = {
+  state: {
+    characters: [],
+    selectedCharacters: []
+  },
+  initialiseCharacters: function initialiseCharacters(data) {
+    var _this = this;
+
+    data.forEach(function (arr) {
+      _this.state.characters.push(arr);
+    });
+  },
+  getSelectedCharacters: function getSelectedCharacters() {
+    return this.state.selectedCharacters;
+  },
+  resetSelectedCharacters: function resetSelectedCharacters() {
+    this.state.selectedCharacters = [];
+  },
+  addCharacter: function addCharacter(character) {
+    if (this.state.selectedCharacters.length < 3) {
+      this.state.selectedCharacters.push(character);
+    }
+  }
+};
 
 /***/ }),
 
