@@ -27,6 +27,12 @@ export const store = {
             }
         }
     },
+    removeCharacter(character) {
+        // remove a single character from the collection
+        this.state.selectedCharacters = this.state.selectedCharacters.filter(
+            c => c.name !== character.name
+        );
+    },
     isSelected(character) {
         // check if the character is selected already
         return this.state.selectedCharacters.find(

@@ -2109,17 +2109,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Board",
   data: function data() {
     return {
-      selectedCharacters: []
+      selectedCharacters: [],
+      downloaded: false,
+      error: false
     };
   },
   mounted: function mounted() {
+    var _this = this;
+
     // get selected characters
-    this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
+    this.$root.$on("updateSelection", function () {
+      _this.getSelectedCharacters();
+    });
   },
   methods: {
     reset: function reset() {
@@ -2127,7 +2144,43 @@ __webpack_require__.r(__webpack_exports__);
 
       _store__WEBPACK_IMPORTED_MODULE_0__["store"].resetSelectedCharacters(); // empty selectedCharacters in store.state
 
-      this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters(); // re-render the array, selectedCharacters
+      this.getSelectedCharacters(); // re-render the array, selectedCharacters
+    },
+    dowloadCSV: function dowloadCSV() {
+      var _this2 = this;
+
+      axios({
+        url: "/api/characters/csv",
+        method: "POST",
+        responseType: "blob",
+        // see https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
+        data: this.selectedCharacters,
+        headers: {
+          Accept: "text/csv"
+        }
+      }).then(function (res) {
+        var url = window.URL.createObjectURL(new Blob([res.data]));
+        var link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "swapi.csv");
+        document.body.appendChild(link);
+        link.click();
+        _this2.downloaded = true;
+
+        _this2.reset();
+
+        setTimeout(function () {
+          _this2.downloaded = false;
+        }, 5000);
+      })["catch"](function (error) {
+        _this2.error = true;
+        setTimeout(function () {
+          _this2.error = false;
+        }, 5000);
+      });
+    },
+    getSelectedCharacters: function getSelectedCharacters() {
+      this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
     }
   }
 });
@@ -2195,8 +2248,15 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     // add selected characters to store.state
     addCharacter: function addCharacter() {
-      _store__WEBPACK_IMPORTED_MODULE_0__["store"].addCharacter(this.character);
-      this.charSelected = this.isSelected();
+      if (!this.charSelected) {
+        _store__WEBPACK_IMPORTED_MODULE_0__["store"].addCharacter(this.character);
+        this.charSelected = this.isSelected();
+      } else {
+        _store__WEBPACK_IMPORTED_MODULE_0__["store"].removeCharacter(this.character);
+        this.charSelected = false;
+      }
+
+      this.$root.$emit("updateSelection");
     },
     // check if this character is selected already
     isSelected: function isSelected() {
@@ -20710,8 +20770,9 @@ var render = function() {
                     "button",
                     {
                       staticClass:
-                        "flex items-center justify-center w-1/2 px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 focus:outline-none",
-                      attrs: { type: "button" }
+                        "flex items-center justify-center w-1/2 px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 cursor-pointer focus:outline-none",
+                      attrs: { type: "button" },
+                      on: { click: _vm.dowloadCSV }
                     },
                     [_vm._v("download")]
                   )
@@ -20731,6 +20792,18 @@ var render = function() {
                 },
                 [_vm._v("reset")]
               )
+            ])
+          ])
+        : _vm.downloaded
+        ? _c("div", [
+            _c("p", { staticClass: "text-xl font-bold text-white uppercase" }, [
+              _vm._v("CSV has been downloaded successfully!")
+            ])
+          ])
+        : _vm.error
+        ? _c("div", [
+            _c("p", { staticClass: "text-xl font-bold text-white uppercase" }, [
+              _vm._v("An error occurred. Please try again.")
             ])
           ])
         : _c("div", [
@@ -33293,6 +33366,12 @@ var store = {
         this.state.selectedCharacters.push(Object.assign({}, character));
       }
     }
+  },
+  removeCharacter: function removeCharacter(character) {
+    // remove a single character from the collection
+    this.state.selectedCharacters = this.state.selectedCharacters.filter(function (c) {
+      return c.name !== character.name;
+    });
   },
   isSelected: function isSelected(character) {
     // check if the character is selected already

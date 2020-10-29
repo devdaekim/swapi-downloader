@@ -1,0 +1,6 @@
+name,height,mass,hair_color,skin_color,eye_color,birth_year,gender,homeworld,films,species,vehicles,starships,created,edited,url
+"Boba Fett",183,78.2,black,fair,brown,31.5BBY,male,http://swapi.dev/api/planets/10/,"http://swapi.dev/api/films/2/
+http://swapi.dev/api/films/3/
+http://swapi.dev/api/films/5/",,,http://swapi.dev/api/starships/21/,2014-12-15T12:49:32.457000Z,2014-12-20T21:17:50.349000Z,http://swapi.dev/api/people/22/
+IG-88,200,140,none,metal,red,15BBY,none,http://swapi.dev/api/planets/28/,http://swapi.dev/api/films/2/,http://swapi.dev/api/species/2/,,,2014-12-15T12:51:10.076000Z,2014-12-20T21:17:50.351000Z,http://swapi.dev/api/people/23/
+Bossk,190,113,none,green,red,53BBY,male,http://swapi.dev/api/planets/29/,http://swapi.dev/api/films/2/,http://swapi.dev/api/species/7/,,,2014-12-15T12:53:49.297000Z,2014-12-20T21:17:50.355000Z,http://swapi.dev/api/people/24/

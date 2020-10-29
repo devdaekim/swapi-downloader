@@ -44,8 +44,14 @@
     methods: {
       // add selected characters to store.state
       addCharacter() {
-        store.addCharacter(this.character);
-        this.charSelected = this.isSelected();
+        if (!this.charSelected) {
+          store.addCharacter(this.character);
+          this.charSelected = this.isSelected();
+        } else {
+          store.removeCharacter(this.character);
+          this.charSelected = false;
+        }
+        this.$root.$emit("updateSelection");
       },
       // check if this character is selected already
       isSelected() {
