@@ -117,15 +117,18 @@
         });
     },
     computed: {
+      // get data for each page
       pagenatedData() {
         let start = this.pageNo * this.numCharactersPerPage;
         let end = start + this.numCharactersPerPage;
 
         return this.characters.slice(start, end);
       },
+      // disable previous button when page is the first
       disablePrev() {
         return this.pageNo === 0;
       },
+      // disable previous button when page is the last
       disableNext() {
         return this.pageNo + 1 === this.pageCount();
       },
@@ -137,6 +140,7 @@
       prevPage() {
         this.pageNo--;
       },
+      // the total number of pages
       pageCount() {
         let totalCharacters = store.getTotalCharacters();
         return Math.ceil(totalCharacters / this.numCharactersPerPage);

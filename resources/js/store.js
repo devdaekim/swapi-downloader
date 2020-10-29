@@ -18,17 +18,19 @@ export const store = {
         this.state.selectedCharacters = [];
     },
     addCharacter(character) {
+        // add more characters only upto 3
         if (this.state.selectedCharacters.length < 3) {
-            // determin if the character is already selected
-            let selected = this.state.selectedCharacters.find(
-                c => c.name === character.name
-            );
-
-            if (!selected) {
+            if (!this.isSelected(character)) {
                 this.state.selectedCharacters.push(
                     Object.assign({}, character)
                 );
             }
         }
+    },
+    isSelected(character) {
+        // check if the character is selected already
+        return this.state.selectedCharacters.find(
+            c => c.name === character.name
+        );
     }
 };

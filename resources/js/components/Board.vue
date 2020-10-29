@@ -18,12 +18,12 @@
         <button
           type="button"
           v-if="selectedCharacters.length === 3"
-          class="flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 focus:outline-none"
+          class="flex items-center justify-center w-1/2 px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 focus:outline-none"
         >download</button>
         <button
           type="button"
           @click="reset()"
-          class="flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-white uppercase bg-red-500 focus:outline-none"
+          class="flex items-center justify-center w-1/2 px-4 py-2 text-sm font-bold text-white uppercase bg-red-500 focus:outline-none"
         >reset</button>
       </div>
     </div>
@@ -41,13 +41,14 @@
       selectedCharacters: [],
     }),
     mounted() {
+      // get selected characters
       this.selectedCharacters = store.getSelectedCharacters();
     },
     methods: {
       reset() {
-        this.$root.$emit("resetSelected");
-        store.resetSelectedCharacters();
-        this.selectedCharacters = store.getSelectedCharacters();
+        this.$root.$emit("resetSelected"); // emit to Character.vue to reset selection
+        store.resetSelectedCharacters(); // empty selectedCharacters in store.state
+        this.selectedCharacters = store.getSelectedCharacters(); // re-render the array, selectedCharacters
       },
     },
   };

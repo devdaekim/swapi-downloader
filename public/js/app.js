@@ -2032,14 +2032,17 @@ __webpack_require__.r(__webpack_exports__);
     });
   },
   computed: {
+    // get data for each page
     pagenatedData: function pagenatedData() {
       var start = this.pageNo * this.numCharactersPerPage;
       var end = start + this.numCharactersPerPage;
       return this.characters.slice(start, end);
     },
+    // disable previous button when page is the first
     disablePrev: function disablePrev() {
       return this.pageNo === 0;
     },
+    // disable previous button when page is the last
     disableNext: function disableNext() {
       return this.pageNo + 1 === this.pageCount();
     }
@@ -2051,6 +2054,7 @@ __webpack_require__.r(__webpack_exports__);
     prevPage: function prevPage() {
       this.pageNo--;
     },
+    // the total number of pages
     pageCount: function pageCount() {
       var totalCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getTotalCharacters();
       return Math.ceil(totalCharacters / this.numCharactersPerPage);
@@ -2114,13 +2118,16 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
+    // get selected characters
     this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
   },
   methods: {
     reset: function reset() {
-      this.$root.$emit("resetSelected");
-      _store__WEBPACK_IMPORTED_MODULE_0__["store"].resetSelectedCharacters();
-      this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
+      this.$root.$emit("resetSelected"); // emit to Character.vue to reset selection
+
+      _store__WEBPACK_IMPORTED_MODULE_0__["store"].resetSelectedCharacters(); // empty selectedCharacters in store.state
+
+      this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters(); // re-render the array, selectedCharacters
     }
   }
 });
@@ -2173,20 +2180,27 @@ __webpack_require__.r(__webpack_exports__);
   props: ["character"],
   data: function data() {
     return {
-      isSelected: false
+      charSelected: false
     };
   },
   mounted: function mounted() {
     var _this = this;
 
+    // when reset button clicked, reset seletion
     this.$root.$on("resetSelected", function () {
-      _this.isSelected = false;
+      _this.charSelected = false;
     });
+    this.charSelected = this.isSelected();
   },
   methods: {
-    addCharacter: function addCharacter(character) {
-      this.isSelected = true;
-      _store__WEBPACK_IMPORTED_MODULE_0__["store"].addCharacter(character);
+    // add selected characters to store.state
+    addCharacter: function addCharacter() {
+      _store__WEBPACK_IMPORTED_MODULE_0__["store"].addCharacter(this.character);
+      this.charSelected = this.isSelected();
+    },
+    // check if this character is selected already
+    isSelected: function isSelected() {
+      return _store__WEBPACK_IMPORTED_MODULE_0__["store"].isSelected(this.character);
     }
   }
 });
@@ -20696,7 +20710,7 @@ var render = function() {
                     "button",
                     {
                       staticClass:
-                        "flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 focus:outline-none",
+                        "flex items-center justify-center w-1/2 px-4 py-2 text-sm font-bold text-white uppercase bg-green-500 focus:outline-none",
                       attrs: { type: "button" }
                     },
                     [_vm._v("download")]
@@ -20707,7 +20721,7 @@ var render = function() {
                 "button",
                 {
                   staticClass:
-                    "flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-white uppercase bg-red-500 focus:outline-none",
+                    "flex items-center justify-center w-1/2 px-4 py-2 text-sm font-bold text-white uppercase bg-red-500 focus:outline-none",
                   attrs: { type: "button" },
                   on: {
                     click: function($event) {
@@ -20754,11 +20768,7 @@ var render = function() {
     {
       staticClass:
         "flex items-center h-32 transition duration-500 ease-in-out transform bg-white cursor-pointer hover:-translate-y-1 hover:bg-gray-300",
-      on: {
-        click: function($event) {
-          return _vm.addCharacter(_vm.character)
-        }
-      }
+      on: { click: _vm.addCharacter }
     },
     [
       _c("div", { staticClass: "h-32" }, [
@@ -20792,7 +20802,7 @@ var render = function() {
         {
           staticClass:
             "flex items-center justify-end w-full h-full p-4 font-bold text-right text-gray-700 uppercase",
-          class: { "bg-green-400": _vm.isSelected }
+          class: { "bg-green-400": _vm.charSelected && _vm.isSelected() }
         },
         [_c("p", [_vm._v(_vm._s(_vm.character.name))])]
       )
@@ -33277,16 +33287,18 @@ var store = {
     this.state.selectedCharacters = [];
   },
   addCharacter: function addCharacter(character) {
+    // add more characters only upto 3
     if (this.state.selectedCharacters.length < 3) {
-      // determin if the character is already selected
-      var selected = this.state.selectedCharacters.find(function (c) {
-        return c.name === character.name;
-      });
-
-      if (!selected) {
+      if (!this.isSelected(character)) {
         this.state.selectedCharacters.push(Object.assign({}, character));
       }
     }
+  },
+  isSelected: function isSelected(character) {
+    // check if the character is selected already
+    return this.state.selectedCharacters.find(function (c) {
+      return c.name === character.name;
+    });
   }
 };
 
