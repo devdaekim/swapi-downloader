@@ -19,8 +19,11 @@
         />
       </svg>
     </div>
-    <div class="w-full p-4 font-bold text-right text-gray-700">
-      <p>{{ uppercasedName }}</p>
+    <div
+      class="flex items-center justify-end w-full h-full p-4 font-bold text-right text-gray-700 uppercase"
+      :class="{ 'bg-green-400' : isSelected }"
+    >
+      <p>{{ character.name }}</p>
     </div>
   </div>
 </template>
@@ -30,14 +33,17 @@
   export default {
     name: "Characters",
     props: ["character"],
-    data: () => ({}),
-    computed: {
-      uppercasedName() {
-        return this.character.name.toUpperCase();
-      },
+    data: () => ({
+      isSelected: false,
+    }),
+    mounted() {
+      this.$root.$on("resetSelected", () => {
+        this.isSelected = false;
+      });
     },
     methods: {
       addCharacter(character) {
+        this.isSelected = true;
         store.addCharacter(character);
       },
     },

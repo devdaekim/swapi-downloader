@@ -1941,6 +1941,59 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -1953,16 +2006,19 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       characterLoading: true,
-      characters: _store__WEBPACK_IMPORTED_MODULE_0__["store"].state.characters
+      characters: _store__WEBPACK_IMPORTED_MODULE_0__["store"].state.characters,
+      pageNo: 0,
+      numCharactersPerPage: 9
     };
   },
   mounted: function mounted() {
     var _this = this;
 
+    /** Fetching data from SWAPI */
     axios.get("https://swapi.dev/api/people/").then(function (res) {
       var numCharacters = res.data.count;
       var numCharactersPerPage = res.data.results.length;
-      var numPages = Math.floor(numCharacters / numCharactersPerPage) + 1;
+      var numPages = Math.floor(numCharacters / numCharactersPerPage) + 1; // loop through all pages to get all data
 
       for (var i = 1; i <= numPages; i++) {
         axios.get("https://swapi.dev/api/people/?page=".concat(i)).then(function (res) {
@@ -1974,6 +2030,31 @@ __webpack_require__.r(__webpack_exports__);
     })["finally"](function () {
       _this.characterLoading = false;
     });
+  },
+  computed: {
+    pagenatedData: function pagenatedData() {
+      var start = this.pageNo * this.numCharactersPerPage;
+      var end = start + this.numCharactersPerPage;
+      return this.characters.slice(start, end);
+    },
+    disablePrev: function disablePrev() {
+      return this.pageNo === 0;
+    },
+    disableNext: function disableNext() {
+      return this.pageNo + 1 === this.pageCount();
+    }
+  },
+  methods: {
+    nextPage: function nextPage() {
+      this.pageNo++;
+    },
+    prevPage: function prevPage() {
+      this.pageNo--;
+    },
+    pageCount: function pageCount() {
+      var totalCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getTotalCharacters();
+      return Math.ceil(totalCharacters / this.numCharactersPerPage);
+    }
   }
 });
 
@@ -2023,6 +2104,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Board",
@@ -2036,6 +2118,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     reset: function reset() {
+      this.$root.$emit("resetSelected");
       _store__WEBPACK_IMPORTED_MODULE_0__["store"].resetSelectedCharacters();
       this.selectedCharacters = _store__WEBPACK_IMPORTED_MODULE_0__["store"].getSelectedCharacters();
     }
@@ -2081,20 +2164,28 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Characters",
   props: ["character"],
   data: function data() {
-    return {};
+    return {
+      isSelected: false
+    };
   },
-  computed: {
-    uppercasedName: function uppercasedName() {
-      return this.character.name.toUpperCase();
-    }
+  mounted: function mounted() {
+    var _this = this;
+
+    this.$root.$on("resetSelected", function () {
+      _this.isSelected = false;
+    });
   },
   methods: {
     addCharacter: function addCharacter(character) {
+      this.isSelected = true;
       _store__WEBPACK_IMPORTED_MODULE_0__["store"].addCharacter(character);
     }
   }
@@ -20397,7 +20488,10 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "flex flex-col flex-1 bg-black", attrs: { id: "main" } },
+    {
+      staticClass: "flex flex-col flex-1 h-screen bg-black",
+      attrs: { id: "main" }
+    },
     [
       _c("div", { staticClass: "flex justify-center w-full mt-6" }, [
         _c(
@@ -20428,21 +20522,122 @@ var render = function() {
         1
       ),
       _vm._v(" "),
-      _c("div", { staticClass: "flex justify-center" }, [
-        _vm.characterLoading
-          ? _c("div", [_vm._v("The Force will be with you. Always ...")])
-          : _c(
-              "div",
-              { staticClass: "grid grid-cols-3 gap-10" },
-              _vm._l(_vm.characters, function(character, index) {
-                return _c("Characters", {
-                  key: index,
-                  attrs: { character: character }
-                })
-              }),
-              1
-            )
-      ])
+      _c(
+        "div",
+        { staticClass: "flex items-stretch justify-center space-x-4" },
+        [
+          _c(
+            "div",
+            {
+              staticClass:
+                "w-12 m-auto text-white transition duration-300 opacity-50 hover:opacity-100"
+            },
+            [
+              _c(
+                "button",
+                {
+                  class: { "opacity-50 cursor-not-allowed": _vm.disablePrev },
+                  attrs: { disabled: _vm.disablePrev },
+                  on: { click: _vm.prevPage }
+                },
+                [
+                  _c(
+                    "svg",
+                    {
+                      staticClass: "w-full",
+                      attrs: {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        viewBox: "0 0 320 512"
+                      }
+                    },
+                    [
+                      _c("path", {
+                        attrs: {
+                          fill: "currentColor",
+                          d:
+                            "M34.52 239.03L228.87 44.69c9.37-9.37 24.57-9.37 33.94 0l22.67 22.67c9.36 9.36 9.37 24.52.04 33.9L131.49 256l154.02 154.75c9.34 9.38 9.32 24.54-.04 33.9l-22.67 22.67c-9.37 9.37-24.57 9.37-33.94 0L34.52 272.97c-9.37-9.37-9.37-24.57 0-33.94z"
+                        }
+                      })
+                    ]
+                  )
+                ]
+              )
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "w-full" }, [
+            _vm.characterLoading
+              ? _c("div", [_vm._v("The Force will be with you. Always ...")])
+              : _c(
+                  "div",
+                  { staticClass: "grid grid-cols-3 gap-10" },
+                  _vm._l(_vm.pagenatedData, function(character, index) {
+                    return _c("Characters", {
+                      key: index,
+                      attrs: { character: character }
+                    })
+                  }),
+                  1
+                ),
+            _vm._v(" "),
+            !_vm.characterLoading
+              ? _c(
+                  "div",
+                  {
+                    staticClass: "flex justify-center mt-6 font-bold text-white"
+                  },
+                  [
+                    _vm._v(
+                      "Page " +
+                        _vm._s(_vm.pageNo + 1) +
+                        " / " +
+                        _vm._s(_vm.pageCount())
+                    )
+                  ]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass:
+                "w-12 m-auto text-white transition duration-300 opacity-50 hover:opacity-100"
+            },
+            [
+              _c(
+                "button",
+                {
+                  class: { "opacity-50 cursor-not-allowed": _vm.disableNext },
+                  attrs: { disabled: _vm.disableNext },
+                  on: { click: _vm.nextPage }
+                },
+                [
+                  _c(
+                    "svg",
+                    {
+                      staticClass: "w-full",
+                      attrs: {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        viewBox: "0 0 320 512"
+                      }
+                    },
+                    [
+                      _c("path", {
+                        attrs: {
+                          fill: "currentColor",
+                          d:
+                            "M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"
+                        }
+                      })
+                    ]
+                  )
+                ]
+              )
+            ]
+          )
+        ]
+      )
     ]
   )
 }
@@ -20476,7 +20671,7 @@ var render = function() {
         ? _c("div", [
             _c(
               "div",
-              { staticClass: "text-xl text-white" },
+              { staticClass: "text-xl font-bold text-white uppercase" },
               [
                 _vm._v("\n      You have selected\n      "),
                 _vm._l(_vm.selectedCharacters, function(character, index) {
@@ -20484,8 +20679,10 @@ var render = function() {
                     _vm._v(
                       "\n        " + _vm._s(character.name) + "\n        "
                     ),
-                    index < _vm.selectedCharacters.length - 1
+                    index < _vm.selectedCharacters.length - 2
                       ? _c("span", [_vm._v(",")])
+                      : index < _vm.selectedCharacters.length - 1
+                      ? _c("span", [_vm._v("and")])
                       : _vm._e()
                   ])
                 })
@@ -20523,8 +20720,8 @@ var render = function() {
             ])
           ])
         : _c("div", [
-            _c("p", { staticClass: "text-xl text-white" }, [
-              _vm._v("Select 3 characters to download")
+            _c("p", { staticClass: "text-xl font-bold text-white uppercase" }, [
+              _vm._v("Select 3 characters!")
             ])
           ])
     ]
@@ -20592,8 +20789,12 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "w-full p-4 font-bold text-right text-gray-700" },
-        [_c("p", [_vm._v(_vm._s(_vm.uppercasedName))])]
+        {
+          staticClass:
+            "flex items-center justify-end w-full h-full p-4 font-bold text-right text-gray-700 uppercase",
+          class: { "bg-green-400": _vm.isSelected }
+        },
+        [_c("p", [_vm._v(_vm._s(_vm.character.name))])]
       )
     ]
   )
@@ -33069,12 +33270,22 @@ var store = {
   getSelectedCharacters: function getSelectedCharacters() {
     return this.state.selectedCharacters;
   },
+  getTotalCharacters: function getTotalCharacters() {
+    return this.state.characters.length;
+  },
   resetSelectedCharacters: function resetSelectedCharacters() {
     this.state.selectedCharacters = [];
   },
   addCharacter: function addCharacter(character) {
     if (this.state.selectedCharacters.length < 3) {
-      this.state.selectedCharacters.push(character);
+      // determin if the character is already selected
+      var selected = this.state.selectedCharacters.find(function (c) {
+        return c.name === character.name;
+      });
+
+      if (!selected) {
+        this.state.selectedCharacters.push(Object.assign({}, character));
+      }
     }
   }
 };

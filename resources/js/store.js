@@ -11,12 +11,24 @@ export const store = {
     getSelectedCharacters() {
         return this.state.selectedCharacters;
     },
+    getTotalCharacters() {
+        return this.state.characters.length;
+    },
     resetSelectedCharacters() {
         this.state.selectedCharacters = [];
     },
     addCharacter(character) {
         if (this.state.selectedCharacters.length < 3) {
-            this.state.selectedCharacters.push(character);
+            // determin if the character is already selected
+            let selected = this.state.selectedCharacters.find(
+                c => c.name === character.name
+            );
+
+            if (!selected) {
+                this.state.selectedCharacters.push(
+                    Object.assign({}, character)
+                );
+            }
         }
     }
 };
